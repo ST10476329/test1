@@ -1,7 +1,9 @@
-name: Build MVC
+name: MVC Build and Validation
 
 on:
   push:
+    branches:
+      - part3-mvc
   workflow_dispatch:
 
 env:
@@ -14,6 +16,32 @@ jobs:
     steps:
       - name: Get the code
         uses: actions/checkout@v4
+
+      - name: Validate repository structure
+        run: |
+          missing=0
+          for path in \
+            RaceDayWeb/RaceDayWeb.csproj \
+            RaceDayWeb/Program.cs \
+            RaceDayWeb/appsettings.json \
+            RaceDayWeb/Controllers \
+            RaceDayWeb/Helpers \
+            RaceDayWeb/Models \
+            RaceDayWeb/Services \
+            RaceDayWeb/Views
+          do
+            if [ -e "$path" ]; then
+              echo "OK:      $path"
+            else
+              echo "MISSING: $path"
+              missing=1
+            fi
+          done
+          echo "--- C# and Razor files found ---"
+          find RaceDayWeb -name "*.cs" -o -name "*.cshtml" | grep -v -E "/(bin|obj)/" | sort
+          echo "--- namespaces declared in Models ---"
+          grep -rn "namespace" RaceDayWeb/Models 2>/dev/null || echo "No Models files found"
+          exit $missing
 
       - name: Install .NET 10
         uses: actions/setup-dotnet@v4

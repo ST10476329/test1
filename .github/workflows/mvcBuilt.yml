@@ -2,8 +2,6 @@ name: MVC Build and Validation
 
 on:
   push:
-    branches:
-      - part3-mvc
   workflow_dispatch:
 
 env:
